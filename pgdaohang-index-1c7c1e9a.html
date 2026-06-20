@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>pg导航 · 日常查询与对照索引</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            background: linear-gradient(145deg, #f9e1c3 0%, #f7cfb0 30%, #eed1b5 60%, #e6c7aa 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 1.5rem;
+            line-height: 1.7;
+            color: #3d2e1d;
+        }
+
+        .magazine-card {
+            max-width: 900px;
+            width: 100%;
+            background: rgba(255, 254, 250, 0.92);
+            backdrop-filter: blur(6px);
+            border-radius: 48px 48px 32px 32px;
+            box-shadow: 0 20px 40px rgba(120, 70, 40, 0.12), 0 8px 18px rgba(100, 60, 30, 0.08);
+            padding: 2.8rem 2.4rem 2.6rem;
+            transition: transform 0.25s ease;
+        }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 1.2rem 0.8rem;
+            }
+            .magazine-card {
+                padding: 2rem 1.2rem 1.8rem;
+                border-radius: 36px;
+            }
+        }
+
+        .hero-badge {
+            display: inline-block;
+            background: #e1b48c;
+            color: #2f2317;
+            font-size: 0.75rem;
+            letter-spacing: 1px;
+            padding: 0.3rem 1rem;
+            border-radius: 40px;
+            margin-bottom: 0.6rem;
+            font-weight: 500;
+        }
+
+        h1 {
+            font-size: 2.4rem;
+            font-weight: 500;
+            letter-spacing: -0.02em;
+            color: #372a1a;
+            margin-bottom: 0.2rem;
+            line-height: 1.2;
+            border-left: 5px solid #d9a77b;
+            padding-left: 1.2rem;
+        }
+
+        .subhead {
+            font-size: 1.1rem;
+            color: #66543d;
+            margin: 0.4rem 0 1.8rem 1.7rem;
+            font-weight: 350;
+            border-bottom: 1px dashed #dbbc9b;
+            padding-bottom: 0.85rem;
+        }
+
+        .intro-block {
+            background: #fcf7f0;
+            padding: 1.5rem 1.8rem;
+            border-radius: 28px;
+            margin: 1.8rem 0 1.5rem;
+            box-shadow: inset 0 2px 6px rgba(190, 150, 110, 0.06);
+        }
+
+        .intro-block p {
+            margin-bottom: 1rem;
+        }
+
+        .intro-block p:last-child {
+            margin-bottom: 0;
+        }
+
+        .features-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            margin: 2.2rem 0 1.6rem;
+        }
+
+        .feature-item {
+            flex: 1 1 180px;
+            background: #f3ede5;
+            padding: 1.2rem 1rem;
+            border-radius: 30px;
+            text-align: center;
+            box-shadow: 0 4px 10px rgba(140, 95, 55, 0.05);
+        }
+
+        .feature-item span {
+            display: block;
+            font-size: 1.8rem;
+            margin-bottom: 0.2rem;
+        }
+
+        .feature-item h3 {
+            font-size: 1rem;
+            font-weight: 500;
+            margin-bottom: 0.2rem;
+            color: #3b2c1b;
+        }
+
+        .feature-item p {
+            font-size: 0.9rem;
+            color: #5c4a35;
+        }
+
+        .scene-note {
+            background: #f5ede3;
+            border-radius: 24px;
+            padding: 1.2rem 1.6rem;
+            margin: 2rem 0 1rem;
+            border-left: 6px solid #dbaa7e;
+            font-size: 0.98rem;
+        }
+
+        .scene-note strong {
+            color: #2f2010;
+        }
+
+        .link-sentence {
+            font-size: 1.06rem;
+            padding: 0.8rem 0 0.2rem;
+            border-top: 1px solid #e7d4bf;
+            margin-top: 1.8rem;
+        }
+
+        .link-sentence a {
+            color: #7c5b38;
+            font-weight: 500;
+            text-decoration: none;
+            background: #efe0cd;
+            padding: 0.15rem 0.8rem;
+            border-radius: 40px;
+            transition: background 0.2s, color 0.2s;
+        }
+
+        .link-sentence a:hover {
+            background: #d9b690;
+            color: #221a0f;
+        }
+
+        .faq-tiny {
+            margin-top: 2.2rem;
+            padding-top: 1rem;
+            border-top: 1px solid #e2cfb8;
+        }
+
+        .faq-tiny details {
+            margin-bottom: 0.6rem;
+            background: #f9f2e9;
+            border-radius: 30px;
+            padding: 0.4rem 1.2rem;
+            cursor: default;
+        }
+
+        .faq-tiny summary {
+            font-weight: 450;
+            color: #3f2f1d;
+            padding: 0.5rem 0;
+            list-style: none;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .faq-tiny summary::after {
+            content: "＋";
+            font-size: 1.0rem;
+            color: #a7886b;
+            transition: 0.2s;
+        }
+
+        .faq-tiny details[open] summary::after {
+            content: "−";
+        }
+
+        .faq-tiny details p {
+            padding: 0.2rem 0 0.8rem 0.4rem;
+            color: #4f3d2a;
+            font-size: 0.95rem;
+        }
+
+        .footer-note {
+            margin-top: 2.2rem;
+            font-size: 0.85rem;
+            text-align: center;
+            color: #78624b;
+            border-top: 1px solid #ebd9c7;
+            padding-top: 1.5rem;
+            letter-spacing: 0.3px;
+        }
+
+        .footer-note a {
+            color: #7f5f3e;
+            text-decoration: underline 1px dotted #b8936f;
+            text-underline-offset: 4px;
+        }
+    </style>
+</head>
+<body>
+<div class="magazine-card">
+    <div class="hero-badge">📖 日常对照 · 延伸阅读</div>
+    <h1>查询、对照与延伸阅读</h1>
+    <div class="subhead">一种温和的导航方式，围绕你熟悉的日常</div>
+
+    <div class="intro-block">
+        <p>遇到一个陌生的概念、一份需要对比的资料、或者一段想深入了解的领域，你常常会同时打开好几个页面，在标签页之间反复切换。这种时候，一个能快速定位、分类清晰、且没有多余干扰的索引工具，就显得格外顺手。<a href="https://pgdaohang.com" style="background:transparent; padding:0; color:#7c5b38; text-decoration:underline wavy #dbb999 1px; text-underline-offset:5px;">pg导航</a> 正是以这样的初衷被整理出来——它不试图取代你的搜索习惯，而是在你已经有方向的时候，提供更安静、更聚焦的对照路径。</p>
+        <p>无论是工作中核实一条术语，还是兴趣阅读时查找关联资料，你都可以把它当作一个安静的起点。这里的分类保持简洁，入口也尽量平实，避免过度设计带来的认知负担。你只需要顺着自己当下的问题，慢慢浏览，找到接下来要去的地方。</p>
+    </div>
+
+    <div class="features-grid">
+        <div class="feature-item">
+            <span>🔍</span>
+            <h3>对照索引</h3>
+            <p>并列呈现相关方向，便于快速对比与参考</p>
+        </div>
+        <div class="feature-item">
+            <span>🧩</span>
+            <h3>延伸触角</h3>
+            <p>从一个条目自然链接到更多背景信息</p>
+        </div>
+        <div class="feature-item">
+            <span>📌</span>
+            <h3>日常场景</h3>
+            <p>工作、阅读、兴趣探索，随取随用</p>
+        </div>
+    </div>
+
+    <div class="scene-note">
+        <strong>一个常见场景：</strong>你在读一篇关于城市更新的文章，里面提到了几个规划术语和国外案例。与其逐一从头搜索，不如先打开 pg导航 的对照分类，把术语和案例并列浏览，让信息在同一个视野里彼此呼应。这种“并排放置”的体验，有时比单独搜索更节省心力。
+    </div>
+
+    <div class="link-sentence">
+        如果你也习惯在信息碎片之间寻找线索，不妨从 <a href="https://pgdaohang.com">pg导航</a> 开始一次安静的延伸阅读。
+    </div>
+
+    <div class="faq-tiny">
+        <details>
+            <summary>这个导航适合什么类型的查询？</summary>
+            <p>日常对照、领域快速入门、以及需要同时参考多个来源的场景。它更适合有大致方向后的索引，而非漫无目的的浏览。</p>
+        </details>
+        <details>
+            <summary>页面会频繁更新吗？</summary>
+            <p>保持适度更新，侧重内容质量与分类合理性。你可以把它当作一个缓慢生长、但不冗余的索引本。</p>
+        </details>
+        <details>
+            <summary>移动端使用方便吗？</summary>
+            <p>布局针对手机与平板做了适配，卡片式排版在窄屏下依旧清晰，链接与按钮间距也适合手指操作。</p>
+        </details>
+    </div>
+
+    <div class="footer-note">
+        <span>一份温和的导航索引 · </span>
+        <a href="https://pgdaohang.com">pg导航</a>
+        <span> · 日常对照与延伸阅读</span>
+    </div>
+</div>
+</body>
+</html>
